@@ -21,6 +21,47 @@
             <div id="processingText" style="display: none;">Processing...</div>
             <div id="output" class="output-section"></div>
         </section>
+       
+        <section>
+            <div id="updateIdForm">
+                <label for="recordId">Enter Record ID:</label>
+                <input type="text" id="recordId" />
+                <button onclick="fetchAndUpdate()">Show Details</button>
+            </div>
+            <div id="updateForm" style="display: none;">
+                <label for="issueDate">Issue Date:</label>
+                <input type="text" id="issueDate" />
+
+                <label for="prefix">Prefix:</label>
+                <input type="text" id="prefix" />
+
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" />
+
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" />
+
+                <label for="dateOfBirth">Date of Birth:</label>
+                <input type="text" id="dateOfBirth" />
+
+                <label for="expiryDate">Expiry Date:</label>
+                <input type="text" id="expiryDate" />
+
+                <label for="id_num">Card id_num :</label>
+                <input type="text" id="id_num" />
+
+                <button onclick="updateRecord()">Update</button>
+            </div>
+        </section>
+
+        <section>
+            <div id="deleteForm">
+                <label for="deleteId">Enter Record ID to Delete:</label>
+                <input type="text" id="deleteId" />
+                <button onclick="deleteRecord()">Delete</button>
+            </div>
+        </section>
+
         <section>
             <div class="history-section">
                 <h2>OCR History</h2>
@@ -28,6 +69,7 @@
                 <div id="historyList" class="history-list"></div>
             </div>
         </section>
+
     </div>
     <script src="script.js"></script>
 </body>

@@ -73,3 +73,41 @@ button {
 button {
     margin-right: 10px;
 }
+
+/* Add this CSS to your styles.css file or within a <style> tag in your HTML */
+
+#updateIdForm {
+    margin-bottom: 20px;
+}
+
+#updateForm {
+    display: none;
+    background-color: #fff;
+    padding: 15px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#updateForm label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#updateForm input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+#updateForm button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#updateForm button:hover {
+    background-color: #45a049;
+}
