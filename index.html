@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Thai ID OCR</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Thai ID OCR</h1>
+        </header>
+        <section>
+            <div class="upload-section">
+                <label for="fileInput" class="custom-file-upload">
+                    <input type="file" id="fileInput" accept=".png, .jpeg, .jpg" />
+                </label>
+                <button onclick="uploadAndProcess()">Upload Image</button>
+            </div>
+            <div id="processingText" style="display: none;">Processing...</div>
+            <div id="output" class="output-section"></div>
+        </section>
+        <section>
+            <div class="history-section">
+                <h2>OCR History</h2>
+                <button id="fetchRecordsButton">Fetch Records</button>
+                <div id="historyList" class="history-list"></div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
