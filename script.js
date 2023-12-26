@@ -7,7 +7,7 @@ function fetchOCRRecordsOnClick() {
         .then(records => {
             console.log(records); // Log the records to the console
             // Handle the fetched records
-            displayOCRRecords(records);
+            displayOCRRecords(records,historyListDiv);
         })
         .catch(error => {
             console.error('Error fetching OCR records:', error);
@@ -19,14 +19,15 @@ function fetchOCRRecordsOnClick() {
 document.getElementById('fetchRecordsButton').addEventListener('click', fetchOCRRecordsOnClick);
 
 // function to display fetched OCR records
-function displayOCRRecords(response) {
-    const historyListDiv = document.getElementById('historyList');
-    historyListDiv.innerHTML = ''; // Clear previous content
+function displayOCRRecords(response,place) {
+    // const historyListDiv = document.getElementById('historyList');
+    place.innerHTML = ''; // Clear previous content
 
     if (response && response.data && Array.isArray(response.data)) {
         response.data.forEach(record => {
             const recordItem = document.createElement('div');
             recordItem.innerHTML = `
+                <p><strong>Status:</strong> Success </p>
                 <p><strong>ID:</strong> ${record.id}</p>
                 <p><strong>Prefix:</strong> ${record.prefix}</p>
                 <p><strong>First Name:</strong> ${record.firstName}</p>
@@ -34,14 +35,15 @@ function displayOCRRecords(response) {
                 <p><strong>Date of Birth:</strong> ${record.dateOfBirth}</p>
                 <p><strong>Issue Date:</strong> ${record.issueDate}</p>
                 <p><strong>Expiry Date:</strong> ${record.expiryDate}</p>
+                <p><strong>id_num:</strong> ${record.id_num}</p>
                 <hr>
             `;
-            historyListDiv.appendChild(recordItem);
+            place.appendChild(recordItem);
         });
     } else {
         // Handle the case where the response format is not as expected
         console.error('Invalid data format for OCR records:', response);
-        historyListDiv.innerHTML = 'Invalid data format for OCR records.';
+        place.innerHTML = 'Invalid data format for OCR records.';
     }
 }
 
@@ -51,11 +53,14 @@ function displayOCRRecords(response) {
 function uploadAndProcess() {
     const fileInput = document.getElementById('fileInput');
     const outputDiv = document.getElementById('output');
-    outputDiv.innerHTML = 'Processing...'
+    
     const file = fileInput.files[0];
     if (!file) {
-        alert('Please choose a file.');
+        alert('Please choose a file.'); 
         return;
+    }
+    else{
+        outputDiv.innerHTML = 'Processing, Please wait (may take upto 3 minutes)';
     }
 
     const formData = new FormData();
@@ -67,8 +72,16 @@ function uploadAndProcess() {
     })
     .then(response => response.json())
     .then(data => {
-        // Handle OCR results
-        outputDiv.innerHTML = JSON.stringify(data, null, 2);
+        // Check if the response has a 'result' property
+        if (data && data.result) {
+            
+            displayOCRRecords({ data: [data.result] }, outputDiv);
+            fileInput.value = '';
+        } else {
+            // Handle the case where the response format is not as expected
+            console.error('Invalid data format for OCR result:', data);
+            outputDiv.innerHTML = 'Invalid data format for OCR result.';
+        }
     })
     .catch(error => {
         console.error('Error processing image:', error);
@@ -77,72 +90,86 @@ function uploadAndProcess() {
 }
 
 function fetchAndUpdate() {
-    const recordId = document.getElementById('recordId').value;
+    const recordIdInput = document.getElementById('recordId');
+    const recordId = recordIdInput.value;
 
-    // Display the update form
-    displayUpdateForm(recordId);
+    if (!recordId) {
+        // If no ID is entered, show an alert
+        alert('Please enter a Record ID.');
+        return;
+    }
+    else{
+        // Displaying the update form
+        displayUpdateForm(recordId);
+    }
+
+    // Checking if the update button should change text
+    const updateButton = document.getElementById('updateButton');
+    if (updateButton) {
+        updateButton.textContent = 'Select Another ID';
+    }
+
+    
 }
 
 function displayUpdateForm(recordId) {
     const updateForm = document.getElementById('updateForm');
     updateForm.innerHTML = ''; // Clear previous content
 
-    // Display input fields with current values
-    const issueDateInput = document.createElement('div');
-    issueDateInput.innerHTML = `
-        <label for="issueDate">Issue Date:</label>
-        <input type="text" id="issueDate" />
+    // Fetch all records
+    fetch('https://qoalaserver-production.up.railway.app/api/records/')
+        .then(response => response.json())
+        .then(records => {
+            // Find the record with the specified ID
+            const record = records.data.find(record => record.id === parseInt(recordId));
+
+
+            if (record) {
+                // Display input fields with current values
+                const issueDateInput = createInput('Issue Date:', 'issueDate', record.issueDate);
+                updateForm.appendChild(issueDateInput);
+
+                const prefixInput = createInput('Prefix:', 'prefix', record.prefix);
+                updateForm.appendChild(prefixInput);
+
+                const firstNameInput = createInput('First Name:', 'firstName', record.firstName);
+                updateForm.appendChild(firstNameInput);
+
+                const lastNameInput = createInput('Last Name:', 'lastName', record.lastName);
+                updateForm.appendChild(lastNameInput);
+
+                const dateOfBirthInput = createInput('Date of Birth:', 'dateOfBirth', record.dateOfBirth);
+                updateForm.appendChild(dateOfBirthInput);
+
+                const expiryDateInput = createInput('Expiry Date:', 'expiryDate', record.expiryDate);
+                updateForm.appendChild(expiryDateInput);
+
+                const idNumInput = createInput('ID Number:', 'id_num', record.id_num);
+                updateForm.appendChild(idNumInput);
+
+                const updateButton = document.createElement('button');
+                updateButton.textContent = 'Update';
+                updateButton.onclick = () => updateRecord(recordId);
+                updateForm.appendChild(updateButton);
+
+                updateForm.style.display = 'block';
+            } else {
+                alert(`Record with ID ${recordId} not found.`);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching records:', error);
+            alert('Error fetching records.');
+        });
+}
+
+function createInput(labelText, inputId, value) {
+    const inputContainer = document.createElement('div');
+    inputContainer.innerHTML = `
+        <label for="${inputId}">${labelText}</label>
+        <input type="text" id="${inputId}" value="${value || ''}" />
     `;
-    updateForm.appendChild(issueDateInput);
-
-    const prefixInput = document.createElement('div');
-    prefixInput.innerHTML = `
-        <label for="prefix">Prefix:</label>
-        <input type="text" id="prefix" />
-    `;
-    updateForm.appendChild(prefixInput);
-
-    const firstNameInput = document.createElement('div');
-    firstNameInput.innerHTML = `
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" />
-    `;
-    updateForm.appendChild(firstNameInput);
-
-    const lastNameInput = document.createElement('div');
-    lastNameInput.innerHTML = `
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" />
-    `;
-    updateForm.appendChild(lastNameInput);
-
-    const dateOfBirthInput = document.createElement('div');
-    dateOfBirthInput.innerHTML = `
-        <label for="dateOfBirth">Date of Birth:</label>
-        <input type="text" id="dateOfBirth" />
-    `;
-    updateForm.appendChild(dateOfBirthInput);
-
-    const expiryDateInput = document.createElement('div');
-    expiryDateInput.innerHTML = `
-        <label for="expiryDate">Expiry Date:</label>
-        <input type="text" id="expiryDate" />
-    `;
-    updateForm.appendChild(expiryDateInput);
-
-    const idNumInput = document.createElement('div');
-    idNumInput.innerHTML = `
-        <label for="id_num">ID Number:</label>
-        <input type="text" id="id_num" />
-    `;
-    updateForm.appendChild(idNumInput);
-
-    const updateButton = document.createElement('button');
-    updateButton.textContent = 'Update';
-    updateButton.onclick = () => updateRecord(recordId);
-    updateForm.appendChild(updateButton);
-
-    updateForm.style.display = 'block';
+    return inputContainer;
 }
 
 function updateRecord(recordId) {
@@ -191,7 +218,11 @@ function updateRecord(recordId) {
 function deleteRecord() {
     // Get the ID to be deleted
     const recordId = document.getElementById('deleteId').value;
-
+    if (!recordId) {
+        // If no ID is entered, show an alert
+        alert('Please enter a Record ID.');
+        return;
+    }
     // Confirm with the user before proceeding with the deletion
     const confirmDelete = confirm(`Are you sure you want to delete the record with ID ${recordId}?`);
     
